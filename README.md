@@ -3,7 +3,7 @@
 This is a C++ library based on the FPmax* algorithm for mining maximal frequent itemsets by Gösta Grahne and Jianfei Zhu [[1,2](#references)].
 
 This project aims to make the FPmax* algorithm available as a shared library so you can call it directly from your code without needing file writing/reading and system calls.
-Most of the original code (which is available from the [FIMI repository](http://fimi.uantwerpen.be/src/fimi06b.tgz)) is preserved.
+Most of the original code (which is available from the [FIMI repository](http://fimi.uantwerpen.be/src)) is preserved.
 
 ## References
 
