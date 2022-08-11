@@ -40,4 +40,5 @@ Otherwise, you can handle input/output in-memory:
 
 To compile/link/run your program, you will need the compiled shared library and the following headers: {[`buffer.h`](src/buffer.h), [`data.h`](src/data.h), [`fitemset.h`](src/fitemset.h), [`fp_node.h`](src/fp_node.h), [`fp_tree.h`](src/fp_tree.h), [`fpmax.h`](src/fpmax.h), [`fsout.h`](src/fsout.h)}
 
-For an example, see the code in the [`test`](test) folder.
+For usage examples, see the code in the [`test`](test) folder or the following project:
+- [MR-MS-ILS](https://github.com/MESS-2020-1/MR-MS-ILS-solver) (a MineReduce-based solver for a facility location problem)
