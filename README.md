@@ -29,15 +29,15 @@ ctest -R lib --verbose
 
 ## Using the shared library
 
-You need to include the [`fpmax.h`](fpmax.h) header and call the `fpmax` function, which has 2 versions.
+You need to include the [`fpmax.h`](src/fpmax.h) header and call the `fpmax` function, which has 2 versions.
 
 If you wish to handle input/output the same way you would with the original FPmax* executable (using files), go for the first version:<br>`void fpmax(char const * in, char const * out, unsigned int minsup)`
 
 Otherwise, you can handle input/output in-memory:
-1. Create a Dataset object (see [`data.h`](data.h) for the definition)
+1. Create a Dataset object (see [`data.h`](src/data.h) for the definition)
 2. Call the second version of the function:<br>`FISet* fpmax(Dataset* dataset, unsigned int minsup, unsigned int nlargest=0)`
-3. Get the return value, a pointer to an FISet object - a set of FrequentItemset objects (see [`fitemset.h`](fitemset.h) for their definitions)
+3. Get the return value, a pointer to an FISet object - a set of FrequentItemset objects (see [`fitemset.h`](src/fitemset.h) for their definitions)
 
-To compile/link/run your program, you will need the compiled shared library and the following headers: {[`buffer.h`](buffer.h), [`data.h`](data.h), [`fitemset.h`](fitemset.h), [`fp_node.h`](fp_node.h), [`fp_tree.h`](fp_tree.h), [`fpmax.h`](fpmax.h), [`fsout.h`](fsout.h)}
+To compile/link/run your program, you will need the compiled shared library and the following headers: {[`buffer.h`](src/buffer.h), [`data.h`](src/data.h), [`fitemset.h`](src/fitemset.h), [`fp_node.h`](src/fp_node.h), [`fp_tree.h`](src/fp_tree.h), [`fpmax.h`](src/fpmax.h), [`fsout.h`](src/fsout.h)}
 
 For an example, see the code in the [`test`](test) folder.
