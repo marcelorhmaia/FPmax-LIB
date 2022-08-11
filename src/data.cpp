@@ -16,7 +16,7 @@ void Transaction::DoubleTrans(int item)
 	t = temp;
 }
 
-Data::Data(char *filename)
+Data::Data(char const *filename) : dataset(NULL)
 {
 #ifndef BINARY
   in = fopen(filename,"rt");
@@ -25,9 +25,16 @@ Data::Data(char *filename)
 #endif
 }
 
+Data::Data(Dataset* dataset) : in(NULL)
+{
+	this->dataset = dataset;
+	nextTransaction = dataset->begin();
+}
+
 Data::~Data()
 {
   if(in) fclose(in);
+  else if (dataset) delete dataset;
 }
 
 int Data::isOpen()
@@ -37,8 +44,27 @@ int Data::isOpen()
 }
 
 Transaction *Data::getNextTransaction(Transaction* Trans)
-{
+{	
 	Trans->length = 0;
+	
+	if (dataset)
+	{
+		if (nextTransaction == dataset->end())
+		{
+			nextTransaction = dataset->begin();
+			return 0;
+		}
+		
+		Trans->DoubleTrans((nextTransaction->size() + 1) / 2);
+		for (std::set<int>::iterator it=nextTransaction->begin(); it!=nextTransaction->end(); ++it)
+		{
+			Trans->t[Trans->length] = *it;
+			Trans->length++;
+		}
+		++nextTransaction;
+		
+		return Trans;
+	}
 
   // read list of items
 #ifndef BINARY	  

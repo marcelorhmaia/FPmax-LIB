@@ -93,10 +93,10 @@ void update_mfi_trees(int treeno)
 	int i, j;
 	for(i=0; i<treeno; i++)
 	{
-		for(j = list->top-1; j >mfitrees[i]->posi+1; j--)
-			current_fi[mfitrees[i]->order[list->FS[j]]] = true;
+		for(j = fpmax_inst->list->top-1; j >fpmax_inst->mfitrees[i]->posi+1; j--)
+			fpmax_inst->current_fi[fpmax_inst->mfitrees[i]->order[fpmax_inst->list->FS[j]]] = true;
 
-		mfitrees[i]->insert(current_fi, list->top-1-mfitrees[i]->posi-1);
+		fpmax_inst->mfitrees[i]->insert(fpmax_inst->current_fi, fpmax_inst->list->top-1-fpmax_inst->mfitrees[i]->posi-1);
 	}
 }
 
@@ -105,11 +105,11 @@ void update_cfi_trees(int treeno, int Count)
 	int i, j;
 	for(i=0; i<treeno; i++)
 	{
-		for(j = list->top-1; j >cfitrees[i]->posi+1; j--)
-			current_fi[cfitrees[i]->order[list->FS[j]]] = true;
+		for(j = fpmax_inst->list->top-1; j >fpmax_inst->cfitrees[i]->posi+1; j--)
+			fpmax_inst->current_fi[fpmax_inst->cfitrees[i]->order[fpmax_inst->list->FS[j]]] = true;
 
-		if(list->top-1-cfitrees[i]->posi-1>0)
-                    cfitrees[i]->insert(current_fi, Count, list->top-1-cfitrees[i]->posi-1);
+		if(fpmax_inst->list->top-1-fpmax_inst->cfitrees[i]->posi-1>0)
+                    fpmax_inst->cfitrees[i]->insert(fpmax_inst->current_fi, Count, fpmax_inst->list->top-1-fpmax_inst->cfitrees[i]->posi-1);
 	}
 }
 
@@ -191,8 +191,8 @@ bool CFI_tree::is_subset(int Count)const
 	int i, *FS;
 	Cnode* temp;
 
-	FS = list->FS;
-	if(list->top==posi+2&&head[order[FS[posi+1]]])
+	FS = fpmax_inst->list->FS;
+	if(fpmax_inst->list->top==posi+2&&head[order[FS[posi+1]]])
 	{
 		for(temp=head[order[FS[posi+1]]];temp!=NULL; temp=temp->next)
 			if(temp->count >= Count)return true;
@@ -202,11 +202,13 @@ bool CFI_tree::is_subset(int Count)const
 	Cnode* temp2;
 	for(temp=head[order[FS[posi+1]]];temp!=NULL; temp=temp->next)
 	{
-		if(temp->level<list->top-1-posi || temp->count<Count)continue;
+		if(temp->level<fpmax_inst->list->top-1-posi || temp->count<Count)continue;
 		temp2=temp->par;
-		for(i=list->top-1; i>=posi+2; i--)
+		for(i=fpmax_inst->list->top-1; i>=posi+2; i--)
 		{
-            for(; temp2->itemname!=-1 && order[temp2->itemname]>order[FS[i]]&&temp2->level>=i-posi-1; temp2=temp2->par);
+            for(; temp2->itemname!=-1 && order[temp2->itemname]>order[FS[i]]&&temp2->level>=i-posi-1; temp2=temp2->par)
+			{
+			}
       		if(temp2->itemname!=FS[i])break;
 			if(i==posi+2)return true;
 		}
@@ -308,18 +310,18 @@ bool CFI_tree::generate_close(int new_item_no, int Count, FSout* fout)
 {
 	int i, whole, temp = Count;
 	
-	if(list->top>1)
-		temp=list->counts[list->top-2];
+	if(fpmax_inst->list->top>1)
+		temp=fpmax_inst->list->counts[fpmax_inst->list->top-2];
 	
-	whole = list->top+new_item_no;
-	for(i=list->top; i<whole && list->counts[i]==Count; i++);
-	list->top = i;
+	whole = fpmax_inst->list->top+new_item_no;
+	for(i=fpmax_inst->list->top; i<whole && fpmax_inst->list->counts[i]==Count; i++);
+	fpmax_inst->list->top = i;
 
-	ITlen[i-1]++;
+	fpmax_inst->ITlen[i-1]++;
 	if(fout)
-		fout->printSet(i, list->FS, Count);
+		fout->printSet(i, fpmax_inst->list->FS, Count);
 
-//	insert(list->FS, posi+1, i, Count);
+//	insert(fpmax_inst->list->FS, posi+1, i, Count);
 //	update_cfi_trees(posi+1, Count);
 	update_cfi_trees(posi+2, Count);  //Modified on Oct. 10, 2003
 
@@ -328,18 +330,18 @@ bool CFI_tree::generate_close(int new_item_no, int Count, FSout* fout)
 
 	while(i<whole)
 	{
-		Count = list->counts[i];
-		for(; i<whole && list->counts[i]==Count; i++);
-		list->top = i;
+		Count = fpmax_inst->list->counts[i];
+		for(; i<whole && fpmax_inst->list->counts[i]==Count; i++);
+		fpmax_inst->list->top = i;
 
 //Patch Dec. 4
-		order_FS(list->FS, posi+2, i-1);
+		order_FS(fpmax_inst->list->FS, posi+2, i-1);
 		if(!is_subset(Count))
 		{
-			ITlen[i-1]++;
+			fpmax_inst->ITlen[i-1]++;
 			if(fout)
-				fout->printSet(i, list->FS, Count);
-//			insert(list->FS, posi+1, i, Count);
+				fout->printSet(i, fpmax_inst->list->FS, Count);
+//			insert(fpmax_inst->list->FS, posi+1, i, Count);
 //			update_cfi_trees(posi+1, Count);
 			update_cfi_trees(posi+2, Count);   //Modified on Oct. 10, 2003
 		}else{
@@ -404,17 +406,19 @@ bool MFI_tree::is_subset()
 	int i;
 	int *FS;
 
-	FS = list->FS;
-	if(list->top==posi+2&&head[order[FS[posi+1]]])return true;
+	FS = fpmax_inst->list->FS;
+	if(fpmax_inst->list->top==posi+2&&head[order[FS[posi+1]]])return true;
 
 	Mnode* temp, *temp2;
 	for(temp=head[order[FS[posi+1]]];temp!=NULL; temp=temp->next)
 	{
-		if(temp->level<list->top-1-posi)continue;
+		if(temp->level<fpmax_inst->list->top-1-posi)continue;
 		temp2=temp->par;
-		for(i=list->top-1; i>=posi+2; i--)
+		for(i=fpmax_inst->list->top-1; i>=posi+2; i--)
 		{
-            for(; temp2->itemname!=-1 && order[temp2->itemname]>order[FS[i]]&&temp2->level>=i-posi-1; temp2=temp2->par);
+            for(; temp2->itemname!=-1 && order[temp2->itemname]>order[FS[i]]&&temp2->level>=i-posi-1; temp2=temp2->par)
+			{
+			}
       		if(temp2->itemname!=FS[i])break;
 			if(i==posi+2)return true;
 		}
@@ -498,27 +502,27 @@ void FI_tree::init(int old_itemno, int new_itemno)
 {
 	int i;
 
-	Root = (Fnode*)fp_buf->newbuf(1, sizeof(Fnode));
+	Root = (Fnode*)fpmax_inst->fp_buf->newbuf(1, sizeof(Fnode));
 	Root->init(NULL, -1, 0);
 //	Root = new Fnode(-1, 0, NULL);
 	if(old_itemno!=-1)
 	{
-		order = (int*)fp_buf->newbuf(ITEM_NO, sizeof(int));
-		count = (int*)fp_buf->newbuf(old_itemno, sizeof(int));
-		table = (int*)fp_buf->newbuf(old_itemno, sizeof(int));
+		order = (int*)fpmax_inst->fp_buf->newbuf(fpmax_inst->ITEM_NO, sizeof(int));
+		count = (int*)fpmax_inst->fp_buf->newbuf(old_itemno, sizeof(int));
+		table = (int*)fpmax_inst->fp_buf->newbuf(old_itemno, sizeof(int));
 		for (i=0; i<old_itemno; i++)
 		{
 			order[i]=-1;
 			count[i] = 0;
 			table[i] = i;
 		}
-		for (; i<ITEM_NO; i++)
+		for (; i<fpmax_inst->ITEM_NO; i++)
 			order[i]=-1;
 	}
 
 	itemno = new_itemno;
 	if(new_itemno!=0)
-		head = (Fnode**)fp_buf->newbuf(itemno, sizeof(Fnode*));
+		head = (Fnode**)fpmax_inst->fp_buf->newbuf(itemno, sizeof(Fnode*));
 }
 
 void FI_tree::scan1_DB(Data* fdat)
@@ -527,26 +531,26 @@ void FI_tree::scan1_DB(Data* fdat)
 	int net_itemno=0;
 	int *counts;
 
-	counts= new int[ITEM_NO];
+	counts= new int[fpmax_inst->ITEM_NO];
 	assert(counts!=NULL);
 
-	for(i=0; i<ITEM_NO; i++)
+	for(i=0; i<fpmax_inst->ITEM_NO; i++)
 		counts[i] = 0;
 
 	Transaction *Tran = new Transaction;
 	assert(Tran!=NULL);
 
-	while(Tran = fdat->getNextTransaction(Tran))
+	while((Tran = fdat->getNextTransaction(Tran)))
 	{	
 		for(int i=0; i<Tran->length; i++) 
 		{
-			if(Tran->t[i]>=ITEM_NO)
+			if(Tran->t[i]>=fpmax_inst->ITEM_NO)
 			{
-				ITEM_NO = 2*Tran->t[i];
+				fpmax_inst->ITEM_NO = 2*Tran->t[i];
 				int* temp = new int[2*Tran->t[i]];
 				for(j=0; j<=net_itemno; j++)
 					temp[j] = counts[j];
-				for(; j<ITEM_NO; j++)
+				for(; j<fpmax_inst->ITEM_NO; j++)
 					temp[j] = 0;
 				delete []counts;
 				counts=temp;
@@ -556,31 +560,31 @@ void FI_tree::scan1_DB(Data* fdat)
 					net_itemno = Tran->t[i];
 			counts[Tran->t[i]]++;
 		}
-		TRANSACTION_NO++;
+		fpmax_inst->TRANSACTION_NO++;
 	}
 
-	ITEM_NO = net_itemno+1;
+	fpmax_inst->ITEM_NO = net_itemno+1;
 
-//	cout << "The dataset contains " << TRANSACTION_NO << " transactions and "
+//	cout << "The dataset contains " << fpmax_inst->TRANSACTION_NO << " transactions and "
 //       << "the largest item is " << net_itemno << endl;
 
-//	THRESHOLD = ceil (TRANSACTION_NO/100000.0 * THRESHOLD);
-//	cout << "The minimum support is "<<THRESHOLD<<endl;
+//	fpmax_inst->THRESHOLD = ceil (fpmax_inst->TRANSACTION_NO/100000.0 * fpmax_inst->THRESHOLD);
+//	cout << "The minimum support is "<<fpmax_inst->THRESHOLD<<endl;
 
-	order = (int*)fp_buf->newbuf(ITEM_NO, sizeof(int));
-	table = (int*)fp_buf->newbuf(ITEM_NO, sizeof(int));
-	count = (int*)fp_buf->newbuf(ITEM_NO, sizeof(int));
-	for (i=0; i<ITEM_NO; i++)
+	order = (int*)fpmax_inst->fp_buf->newbuf(fpmax_inst->ITEM_NO, sizeof(int));
+	table = (int*)fpmax_inst->fp_buf->newbuf(fpmax_inst->ITEM_NO, sizeof(int));
+	count = (int*)fpmax_inst->fp_buf->newbuf(fpmax_inst->ITEM_NO, sizeof(int));
+	for (i=0; i<fpmax_inst->ITEM_NO; i++)
 	{
 		order[i]=-1;
 		count[i] = counts[i];
 		table[i] = i;
 	}
 
-	sort(count, table, 0, ITEM_NO-1);
+	sort(count, table, 0, fpmax_inst->ITEM_NO-1);
 	
-	for (i =0; i<ITEM_NO&&count[i] >= THRESHOLD; i++);
-
+	for (i =0; i<fpmax_inst->ITEM_NO&&count[i] >= fpmax_inst->THRESHOLD; i++);
+	
 	itemno = i;
 
 	for (j=0; j<itemno; j++)
@@ -589,10 +593,10 @@ void FI_tree::scan1_DB(Data* fdat)
 		order[table[j]]=j;
 	}
 
-//	for(int k=0; k<ITEM_NO; k++)cout<<order[k]<<"  "; cout<<endl;
+//	for(int k=0; k<fpmax_inst->ITEM_NO; k++)cout<<order[k]<<"  "; cout<<endl;
 //	for( k=0; k<itemno; k++)cout<<table[k]<<"  "; cout<<endl;
 
-	head = (Fnode**)fp_buf->newbuf(itemno, sizeof(Fnode*));
+	head = (Fnode**)fpmax_inst->fp_buf->newbuf(itemno, sizeof(Fnode*));
 
 	if(itemno>SUDDEN+5)
 	{
@@ -605,25 +609,25 @@ void FI_tree::scan1_DB(Data* fdat)
 		}
 	}else array = NULL;
 
-// The following is for the case when ITEM_NO is very big and fptree->itemno is very small
-	order_item = new int[itemno];
-	item_order = new int[ITEM_NO];
+// The following is for the case when fpmax_inst->ITEM_NO is very big and fptree->itemno is very small
+	fpmax_inst->order_item = new int[itemno];
+	fpmax_inst->item_order = new int[fpmax_inst->ITEM_NO];
 	for(i=0; i<itemno; i++)
 	{
-		head[i] = (Fnode*)fp_buf->newbuf(1, sizeof(Fnode));
+		head[i] = (Fnode*)fpmax_inst->fp_buf->newbuf(1, sizeof(Fnode));
 		head[i]->init(NULL, i, count[i]);		
 
-		order_item[i]=table[i];
+		fpmax_inst->order_item[i]=table[i];
 		table[i]=i;
-		item_order[i] = order[i];
+		fpmax_inst->item_order[i] = order[i];
 		order[i]=i;
 	}
-	for(;i<ITEM_NO; i++)
+	for(;i<fpmax_inst->ITEM_NO; i++)
 	{
-		item_order[i] = order[i];
+		fpmax_inst->item_order[i] = order[i];
 		order[i]=-1;
 	}
-	ITEM_NO = itemno;
+	fpmax_inst->ITEM_NO = itemno;
 
 	delete []counts;
 	delete Tran;
@@ -652,7 +656,7 @@ void FI_tree::insert(int* compact, int counts, int current)
 	while(i<current)
 	{   
 		child = child->append(this, temp1, table[compact[i]], counts);
-		bran[i]++;
+		fpmax_inst->bran[i]++;
 		i++;
 	}
 }
@@ -661,18 +665,18 @@ void FI_tree::cal_level_25()
 {
 	int i, total_25=0, total_50=0, total_bran=0, maxlen=0;
 
-	for(i=0; i<this->itemno && bran[i]!=0; i++);
+	for(i=0; i<this->itemno && fpmax_inst->bran[i]!=0; i++);
 	maxlen =i;
 	for(i=0; i<int(maxlen*0.25); i++)
-		total_25 +=bran[i];
+		total_25 +=fpmax_inst->bran[i];
 	total_50 = total_25;
 	for(i=int(maxlen*0.25); i<this->itemno*0.5; i++)
-		total_50 +=bran[i];
-	for(i=0; i<this->itemno && bran[i]!=0; i++)
+		total_50 +=fpmax_inst->bran[i];
+	for(i=0; i<this->itemno && fpmax_inst->bran[i]!=0; i++)
 	{
-//		cout<<i<<" " <<bran[i]<<endl;
-		total_bran+=bran[i];
-		bran[i]=0;
+//		cout<<i<<" " <<fpmax_inst->bran[i]<<endl;
+		total_bran+=fpmax_inst->bran[i];
+		fpmax_inst->bran[i]=0;
 	}
 	level_25 = (double)total_25/total_bran*100;
 //	cout<<"First 25% levels: "<<(double)total_25/total_bran*100<<"%  "<<"50% levels: "<<(double)total_50/total_bran*100<<"%"<<endl;
@@ -685,7 +689,7 @@ void FI_tree::fill_count(int* origin, int support)
 	{
 		if(origin[i]!=-1)
 		{
-			compact[j++]=i;
+			fpmax_inst->compact[j++]=i;
 			origin[i] = -1;
 		}
 	}
@@ -693,9 +697,9 @@ void FI_tree::fill_count(int* origin, int support)
 	if(array)
 	{
 		int comp_len = j;
-		for(i=comp_len-1; i>0 && compact[i]>SUDDEN; i--)
+		for(i=comp_len-1; i>0 && fpmax_inst->compact[i]>SUDDEN; i--)
 			for(j=i-1; j>=0; j--)
-				array[itemno-1-compact[i]][compact[i]-compact[j]-1]+=support;
+				array[itemno-1-fpmax_inst->compact[i]][fpmax_inst->compact[i]-fpmax_inst->compact[j]-1]+=support;
 	}
 }
 
@@ -704,28 +708,28 @@ void FI_tree::scan2_DB(Data *fdat)
 	int i, j, has;
 	int* origin, *buffer=new int;
 	Transaction *Tran = new Transaction;
-	origin = new int[ITEM_NO];
+	origin = new int[fpmax_inst->ITEM_NO];
 	assert(Tran!=NULL&&origin!=NULL && buffer!=NULL);
 
-	for(j=0; j<ITEM_NO; j++) origin[j]=-1;
+	for(j=0; j<fpmax_inst->ITEM_NO; j++) origin[j]=-1;
 
-	for(i=0; i<TRANSACTION_NO; i++)
+	for(i=0; i<fpmax_inst->TRANSACTION_NO; i++)
 	{
 		Tran = fdat->getNextTransaction(Tran);
 		has=0;
 		for(int j=0; j<Tran->length; j++) 
 		{
-			if(item_order[Tran->t[j]]!=-1)
+			if(fpmax_inst->item_order[Tran->t[j]]!=-1)
 			{
 				has++;
-//				if(origin[item_order[Tran->t[j]]]!=-1)
+//				if(origin[fpmax_inst->item_order[Tran->t[j]]]!=-1)
 //					has--;         // in transaction, items are not supposed to appear more than twice
-				origin[item_order[Tran->t[j]]] = item_order[Tran->t[j]];
+				origin[fpmax_inst->item_order[Tran->t[j]]] = fpmax_inst->item_order[Tran->t[j]];
 			}
 		}
 		if(has){
 			fill_count(origin, 1);
-			insert(compact, 1, has);
+			insert(fpmax_inst->compact, 1, has);
 		}
 	}
 
@@ -743,9 +747,9 @@ void FI_tree::scan1_DB(FI_tree* old_tree)
 
 	for(i=0; i< itemno; i++)
 	{
-		count[i]=supp[old_order[list->FS[i+list->top-itemno]]];
-		table[i]=list->FS[i+list->top-itemno];
-		supp[old_order[list->FS[i+list->top-itemno]]]=0;
+		count[i]=fpmax_inst->supp[old_order[fpmax_inst->list->FS[i+fpmax_inst->list->top-itemno]]];
+		table[i]=fpmax_inst->list->FS[i+fpmax_inst->list->top-itemno];
+		fpmax_inst->supp[old_order[fpmax_inst->list->FS[i+fpmax_inst->list->top-itemno]]]=0;
 	}
 
 	sort(count, table, 0, itemno-1);
@@ -753,16 +757,16 @@ void FI_tree::scan1_DB(FI_tree* old_tree)
 	for(i=0; i<itemno; i++)
 	{
 		order[table[i]]=i;
-		head[i] = (Fnode*)fp_buf->newbuf(1, sizeof(Fnode));
+		head[i] = (Fnode*)fpmax_inst->fp_buf->newbuf(1, sizeof(Fnode));
 		head[i]->init(NULL, table[i], count[i]);		
 	}
 
 	if(itemno > SUDDEN+5 && old_tree->level_25 > SWITCH)
 	{
-		array = (int**)fp_buf->newbuf(itemno-1-SUDDEN, sizeof(int*));
+		array = (int**)fpmax_inst->fp_buf->newbuf(itemno-1-SUDDEN, sizeof(int*));
 		for(i=0; i<itemno-1-SUDDEN; i++)
 		{
-			array[i] = (int*)fp_buf->newbuf(itemno-1-i, sizeof(int));
+			array[i] = (int*)fpmax_inst->fp_buf->newbuf(itemno-1-i, sizeof(int));
 			for(j=0; j<itemno-1-i; j++)
 				array[i][j] = 0;
 		}
@@ -797,7 +801,7 @@ void FI_tree::scan2_DB(FI_tree* old_tree, Fnode* node)
 		if(has)
 		{
 			fill_count(origin, link->count);
-			insert(compact, link->count, has);
+			insert(fpmax_inst->compact, link->count, has);
 		}
 	}
 
@@ -812,10 +816,10 @@ void FI_tree::powerset(int*prefix, int prefixlen, int* items, int current, int i
 	{
 		if(prefixlen!=0)
 		{	
-			ITlen[list->top+prefixlen-1]++;
+			fpmax_inst->ITlen[fpmax_inst->list->top+prefixlen-1]++;
 			if(fout)
 			{
-				fout->printset(list->top, list->FS);
+				fout->printset(fpmax_inst->list->top, fpmax_inst->list->FS);
 				fout->printSet(prefixlen, prefix, this->head[order[prefix[prefixlen-1]]]->count);
 			}
 		}
@@ -830,7 +834,7 @@ void FI_tree::powerset(int*prefix, int prefixlen, int* items, int current, int i
 
 void FI_tree::generate_all(int new_item_no, FSout* fout)const
 {
-	powerset(prefix, 0, list->FS, list->top, list->top+new_item_no, fout);
+	powerset(fpmax_inst->prefix, 0, fpmax_inst->list->FS, fpmax_inst->list->top, fpmax_inst->list->top+new_item_no, fout);
 }
 
 bool FI_tree::Single_path(bool close)const
@@ -843,8 +847,8 @@ bool FI_tree::Single_path(bool close)const
 	if(close)
 		for(node=Root->leftchild; node!=NULL; node=node->leftchild)
 		{
-			list->FS[list->top] = node->itemname;
-			list->counts[list->top++] = node->count;
+			fpmax_inst->list->FS[fpmax_inst->list->top] = node->itemname;
+			fpmax_inst->list->counts[fpmax_inst->list->top++] = node->count;
 		}
 
 	return true;
@@ -906,19 +910,19 @@ int FI_tree::conditional_pattern_base(Fnode* node, bool close)const
 	{
 		parent=temp->par;
 		for(; parent->itemname!=-1;parent=parent->par)
-			supp[order[parent->itemname]]+=temp->count;
+			fpmax_inst->supp[order[parent->itemname]]+=temp->count;
 	}
 
 	int k=0;
 	for(i=0; i<order[node->itemname]; i++)
 	{
-		if(supp[i]>=THRESHOLD)
+		if(fpmax_inst->supp[i]>=fpmax_inst->THRESHOLD)
 		{
 			k++;
-			list->FS[list->top++]=table[i];
-			if(close)list->counts[list->top-1] = supp[i];
+			fpmax_inst->list->FS[fpmax_inst->list->top++]=table[i];
+			if(close)fpmax_inst->list->counts[fpmax_inst->list->top-1] = fpmax_inst->supp[i];
 		}else
-			supp[i] = 0;
+			fpmax_inst->supp[i] = 0;
 	}
 
 	return k;
@@ -928,19 +932,19 @@ int FI_tree::conditional_pattern_base(int itemname, bool close)const
 {
 	int i, k=0, item = itemno-1-order[itemname];
 	for(i=itemno-2-item; i>=0;i--)
-		if(array[item][i]>=THRESHOLD)
+		if(array[item][i]>=fpmax_inst->THRESHOLD)
 		{
 			k++;
-			list->FS[list->top++]=table[itemno-2-item-i];
-			supp[itemno-2-item-i]=array[item][i];
-			if(close)list->counts[list->top-1] = array[item][i];
+			fpmax_inst->list->FS[fpmax_inst->list->top++]=table[itemno-2-item-i];
+			fpmax_inst->supp[itemno-2-item-i]=array[item][i];
+			if(close)fpmax_inst->list->counts[fpmax_inst->list->top-1] = array[item][i];
 		}
 	return k;
 }
 
 int FI_tree::FP_growth(FSout* fout)
 {
-	int i, sequence, current, new_item_no, listlen;
+	int /*i,*/ sequence, /*current,*/ new_item_no, listlen;
 	int MC=0;			//markcount for memory
 	unsigned int MR=0;	//markrest for memory
 	char* MB;			//markbuf for memory
@@ -950,13 +954,13 @@ int FI_tree::FP_growth(FSout* fout)
 	for(sequence=itemno-1; sequence>=0; sequence--)
 	{
 		Current=head[sequence];
-		current=head[sequence]->itemname;
-		list->FS[list->top++]=head[sequence]->itemname;
-		listlen = list->top;
+		//current=head[sequence]->itemname;
+		fpmax_inst->list->FS[fpmax_inst->list->top++]=head[sequence]->itemname;
+		listlen = fpmax_inst->list->top;
 
-		ITlen[list->top-1]++;
+		fpmax_inst->ITlen[fpmax_inst->list->top-1]++;
 		if(fout)
-			fout->printSet(list->top, list->FS, this->head[sequence]->count);
+			fout->printSet(fpmax_inst->list->top, fpmax_inst->list->FS, this->head[sequence]->count);
 		
 		if(array && sequence>SUDDEN+1)
 			new_item_no=conditional_pattern_base(Current->itemname);  //new_item_no is the number of elements in new header table.
@@ -969,40 +973,40 @@ int FI_tree::FP_growth(FSout* fout)
 		{
 			if(new_item_no==1)
 			{
-				ITlen[list->top-1]++;
+				fpmax_inst->ITlen[fpmax_inst->list->top-1]++;
 				if(fout)
-					fout->printSet(list->top, list->FS, supp[order[list->FS[list->top-1]]]);
+					fout->printSet(fpmax_inst->list->top, fpmax_inst->list->FS, fpmax_inst->supp[order[fpmax_inst->list->FS[fpmax_inst->list->top-1]]]);
 			}
-			if(new_item_no==1)supp[order[list->FS[list->top-1]]] = 0;
-			list->top=listlen-1;
+			if(new_item_no==1)fpmax_inst->supp[order[fpmax_inst->list->FS[fpmax_inst->list->top-1]]] = 0;
+			fpmax_inst->list->top=listlen-1;
 			continue;
 		}
 
 		FI_tree *fptree;
-		MB=fp_buf->bufmark(&MR, &MC);
+		MB=fpmax_inst->fp_buf->bufmark(&MR, &MC);
 
-		fptree = (FI_tree*)fp_buf->newbuf(1, sizeof(FI_tree));
+		fptree = (FI_tree*)fpmax_inst->fp_buf->newbuf(1, sizeof(FI_tree));
 		fptree->init(this->itemno, new_item_no);
 
 		fptree->scan1_DB(this);
 		fptree->scan2_DB(this, Current);
 
-		list->top=listlen;							
+		fpmax_inst->list->top=listlen;							
 		if(fptree->Single_path())
 		{
                                /* patch   Oct. 9, 2003*/
                         Fnode* node;
                         for(node=fptree->Root->leftchild; node!=NULL; node=node->leftchild)
-                                list->FS[list->top++] = node->itemname;
-                        list->top = listlen;
+                                fpmax_inst->list->FS[fpmax_inst->list->top++] = node->itemname;
+                        fpmax_inst->list->top = listlen;
                               /*************************/
 			fptree->generate_all(new_item_no, fout);
-			list->top--;
+			fpmax_inst->list->top--;
 		}else{             //not single path
-			i = fptree->FP_growth(fout);
-			list->top = listlen-1;
+			/*i = */fptree->FP_growth(fout);
+			fpmax_inst->list->top = listlen-1;
 		}
-		fp_buf->freebuf(MR, MC, MB);
+		fpmax_inst->fp_buf->freebuf(MR, MC, MB);
 	}
 	return 0;
 }
@@ -1011,7 +1015,7 @@ int FI_tree::FPmax(FSout* fout)
 {
 	static int ms=9;		//power2[i] is the smallest block size for memory  2**9 = 512
 
-	int i, sequence, current, new_item_no, listlen;
+	int i, sequence, /*current,*/ new_item_no, listlen;
 	int MC=0;			//markcount for memory
 	unsigned int MR=0;	//markrest for memory
 	char* MB;			//markbuf for memory
@@ -1021,9 +1025,9 @@ int FI_tree::FPmax(FSout* fout)
 	for(sequence=itemno-1; sequence>=0; sequence--)
 	{
 		Current=head[sequence];
-		current=head[sequence]->itemname;
-		list->FS[list->top++]=head[sequence]->itemname;
-		listlen = list->top;
+		//current=head[sequence]->itemname;
+		fpmax_inst->list->FS[fpmax_inst->list->top++]=head[sequence]->itemname;
+		listlen = fpmax_inst->list->top;
 
 		if(array && sequence>SUDDEN+1)
 			new_item_no=conditional_pattern_base(Current->itemname);  //new_item_no is the number of elements in new header table.
@@ -1035,55 +1039,55 @@ int FI_tree::FPmax(FSout* fout)
 
 		if(LMaxsets->is_subset())            
 		{
-			for(int j=listlen; j < list->top; j++)supp[order[list->FS[j]]] = 0;
+			for(int j=listlen; j < fpmax_inst->list->top; j++)fpmax_inst->supp[order[fpmax_inst->list->FS[j]]] = 0;
 
-			list->top=listlen-1;			
+			fpmax_inst->list->top=listlen-1;			
 			if(new_item_no == sequence)return new_item_no;  
 			continue;
 		}
 		if(new_item_no==0 || new_item_no == 1)
 		{
-			ITlen[list->top-1]++;
+			fpmax_inst->ITlen[fpmax_inst->list->top-1]++;
 			if(fout){
 				if(new_item_no==1)
-					fout->printSet(list->top, list->FS, supp[order[list->FS[list->top-1]]]);
+					fout->printSet(fpmax_inst->list->top, fpmax_inst->list->FS, fpmax_inst->supp[order[fpmax_inst->list->FS[fpmax_inst->list->top-1]]]);
 				else
-					fout->printSet(list->top, list->FS, this->head[sequence]->count);
+					fout->printSet(fpmax_inst->list->top, fpmax_inst->list->FS, this->head[sequence]->count);
 			}
-			LMaxsets->insert(list->FS, LMaxsets->posi+1, list->top+new_item_no-1);
+			LMaxsets->insert(fpmax_inst->list->FS, LMaxsets->posi+1, fpmax_inst->list->top+new_item_no-1);
 			update_mfi_trees(LMaxsets->posi+1);
-			list->top = listlen+1;
-			if(new_item_no==1)supp[order[list->FS[list->top-1]]] = 0;
-			list->top=listlen-1;
+			fpmax_inst->list->top = listlen+1;
+			if(new_item_no==1)fpmax_inst->supp[order[fpmax_inst->list->FS[fpmax_inst->list->top-1]]] = 0;
+			fpmax_inst->list->top=listlen-1;
 			if(new_item_no != sequence)continue;
 			return new_item_no;
 		}
 
 		FI_tree *fptree;
-		MB=fp_buf->bufmark(&MR, &MC);
+		MB=fpmax_inst->fp_buf->bufmark(&MR, &MC);
 
-		fptree = (FI_tree*)fp_buf->newbuf(1, sizeof(FI_tree));
+		fptree = (FI_tree*)fpmax_inst->fp_buf->newbuf(1, sizeof(FI_tree));
 		fptree->init(this->itemno, new_item_no);
 
 		fptree->scan1_DB(this);
 		fptree->scan2_DB(this, Current);
 
-		list->top=listlen;							
+		fpmax_inst->list->top=listlen;							
 		if(fptree->Single_path())
 		{
 			if(fout)
 			{
-				fout->printSet(list->top+new_item_no, list->FS, fptree->head[fptree->itemno-1]->count);
+				fout->printSet(fpmax_inst->list->top+new_item_no, fpmax_inst->list->FS, fptree->head[fptree->itemno-1]->count);
 			}
-			ITlen[list->top+new_item_no-1]++;
-			LMaxsets->insert(list->FS, LMaxsets->posi+1, list->top+new_item_no);
-			list->top = list->top+new_item_no;
+			fpmax_inst->ITlen[fpmax_inst->list->top+new_item_no-1]++;
+			LMaxsets->insert(fpmax_inst->list->FS, LMaxsets->posi+1, fpmax_inst->list->top+new_item_no);
+			fpmax_inst->list->top = fpmax_inst->list->top+new_item_no;
 			update_mfi_trees(LMaxsets->posi+1);
-			list->top = listlen;
-			list->top--;
+			fpmax_inst->list->top = listlen;
+			fpmax_inst->list->top--;
 			if(new_item_no == sequence)
 			{
-				fp_buf->freebuf(MR, MC, MB);
+				fpmax_inst->fp_buf->freebuf(MR, MC, MB);
 				return new_item_no;
 			}
 		}else{             //not single path
@@ -1091,22 +1095,22 @@ int FI_tree::FPmax(FSout* fout)
 			Max_buf=allocate_buf(sequence, LMaxsets->posi, ms);
 
 			MFI_tree* new_LMFI = (MFI_tree*)Max_buf->newbuf(1, sizeof(MFI_tree));
-			new_LMFI->init(Max_buf, fptree, LMaxsets, LMaxsets->head[sequence], list->top-1);
+			new_LMFI->init(Max_buf, fptree, LMaxsets, LMaxsets->head[sequence], fpmax_inst->list->top-1);
 			fptree->set_max_tree(new_LMFI);
-			mfitrees[LMaxsets->posi+2] = new_LMFI;
+			fpmax_inst->mfitrees[LMaxsets->posi+2] = new_LMFI;
 			i=fptree->FPmax(fout);
 				
-			list->top = new_LMFI->posi;
+			fpmax_inst->list->top = new_LMFI->posi;
 			if(Max_buf->half())ms++;
 			delete Max_buf;
 
 			if(i+1 == sequence)
 			{
-				fp_buf->freebuf(MR, MC, MB);
+				fpmax_inst->fp_buf->freebuf(MR, MC, MB);
 				return i+1;
 			}
 		}
-		fp_buf->freebuf(MR, MC, MB);
+		fpmax_inst->fp_buf->freebuf(MR, MC, MB);
 	}
 	return 0;   
 }
@@ -1115,7 +1119,7 @@ int FI_tree::FPclose(FSout* fout)
 {
 	static int ms=9;		//power2[i] is the smallest block size for memory  2**9 = 512
 
-	int i, sequence, current, new_item_no, listlen;
+	int /*i,*/ sequence, /*current,*/ new_item_no, listlen;
 	int MC=0;			//markcount for memory
 	unsigned int MR=0;	//markrest for memory
 	char* MB;			//markbuf for memory
@@ -1125,14 +1129,14 @@ int FI_tree::FPclose(FSout* fout)
 	for(sequence=itemno-1; sequence>=0; sequence--)
 	{
 		Current=head[sequence];
-		current=head[sequence]->itemname;
-		list->FS[list->top++]=head[sequence]->itemname;
-		list->counts[list->top-1] = this->head[sequence]->count;
-		listlen = list->top;
+		//current=head[sequence]->itemname;
+		fpmax_inst->list->FS[fpmax_inst->list->top++]=head[sequence]->itemname;
+		fpmax_inst->list->counts[fpmax_inst->list->top-1] = this->head[sequence]->count;
+		listlen = fpmax_inst->list->top;
 
 		if(LClose->is_subset(this->head[sequence]->count))
 		{	
-			list->top=listlen-1;
+			fpmax_inst->list->top=listlen-1;
 			continue;
 		}
 		if(array && sequence>SUDDEN+1)
@@ -1146,95 +1150,95 @@ int FI_tree::FPclose(FSout* fout)
 		{
 			if(new_item_no==0)
 			{
-				ITlen[list->top-1]++;
+				fpmax_inst->ITlen[fpmax_inst->list->top-1]++;
 				if(fout)
-					fout->printSet(list->top, list->FS, this->head[sequence]->count);
-				LClose->insert(list->FS, LClose->posi+1, list->top+new_item_no-1, this->head[sequence]->count);
+					fout->printSet(fpmax_inst->list->top, fpmax_inst->list->FS, this->head[sequence]->count);
+				LClose->insert(fpmax_inst->list->FS, LClose->posi+1, fpmax_inst->list->top+new_item_no-1, this->head[sequence]->count);
 				update_cfi_trees(LClose->posi+1, this->head[sequence]->count);
 			}else{
-				list->top=listlen;
+				fpmax_inst->list->top=listlen;
 //Bug! Dec. 5
 /*				if(LClose->generate_close(1, this->head[sequence]->count, fout))
 				{	
-					supp[order[list->FS[listlen]]] = 0;
-					list->top=listlen-1;
+					fpmax_inst->supp[order[fpmax_inst->list->FS[listlen]]] = 0;
+					fpmax_inst->list->top=listlen-1;
 					return new_item_no;	
 				}else
-					supp[order[list->FS[listlen]]] = 0;
+					fpmax_inst->supp[order[fpmax_inst->list->FS[listlen]]] = 0;
 */				LClose->generate_close(1, this->head[sequence]->count, fout);
-				supp[order[list->FS[listlen]]] = 0;
+				fpmax_inst->supp[order[fpmax_inst->list->FS[listlen]]] = 0;
 			}
-			list->top=listlen-1;
+			fpmax_inst->list->top=listlen-1;
 			continue;
 		}
 /*		int j;
-		for(j=listlen; j<new_item_no+listlen && list->counts[listlen-1]!=list->counts[j]; j++);
+		for(j=listlen; j<new_item_no+listlen && fpmax_inst->list->counts[listlen-1]!=fpmax_inst->list->counts[j]; j++);
 		if(j==new_item_no+listlen)
 		{
-			ITlen[listlen-1]++;
+			fpmax_inst->ITlen[listlen-1]++;
 			if(fout)
-				fout->printSet(listlen, list->FS, this->head[sequence]->count);
+				fout->printSet(listlen, fpmax_inst->list->FS, this->head[sequence]->count);
 			
-			LClose->insert(list->FS, LClose->posi+1, listlen, this->head[sequence]->count);
-			list->top = listlen;
+			LClose->insert(fpmax_inst->list->FS, LClose->posi+1, listlen, this->head[sequence]->count);
+			fpmax_inst->list->top = listlen;
 			update_cfi_trees(LClose->posi+1, this->head[sequence]->count);
-			list->top += new_item_no;
+			fpmax_inst->list->top += new_item_no;
 		}
 */
 		FI_tree *fptree;
-		MB=fp_buf->bufmark(&MR, &MC);
+		MB=fpmax_inst->fp_buf->bufmark(&MR, &MC);
 
-		fptree = (FI_tree*)fp_buf->newbuf(1, sizeof(FI_tree));
+		fptree = (FI_tree*)fpmax_inst->fp_buf->newbuf(1, sizeof(FI_tree));
 		fptree->init(this->itemno, new_item_no);
 
 		fptree->scan1_DB(this);
 		fptree->scan2_DB(this, Current);
 
-		list->top=listlen;							
+		fpmax_inst->list->top=listlen;							
 		if(fptree->Single_path(1))
 		{
-			list->top=listlen;							
+			fpmax_inst->list->top=listlen;							
 			if(LClose->generate_close(new_item_no, this->head[sequence]->count, fout))
 			{
 				if(new_item_no == sequence)
 				{
-					fp_buf->freebuf(MR, MC, MB);
-					list->top = listlen-1;
+					fpmax_inst->fp_buf->freebuf(MR, MC, MB);
+					fpmax_inst->list->top = listlen-1;
 					return new_item_no;
 				}
 			}					
-			list->top = listlen-1;
+			fpmax_inst->list->top = listlen-1;
 		}else{             //not single path
                                /* patch   Oct. 9, 2003 */
                         int j;
-                        for(j=listlen; j<new_item_no+listlen && list->counts[listlen-1]!=list->counts[j]; j++);
+                        for(j=listlen; j<new_item_no+listlen && fpmax_inst->list->counts[listlen-1]!=fpmax_inst->list->counts[j]; j++);
                         if(j==new_item_no+listlen)
                         {
-                                ITlen[listlen-1]++;
+                                fpmax_inst->ITlen[listlen-1]++;
                                 if(fout)
-                                        fout->printSet(listlen, list->FS, this->head[sequence]->count);
+                                        fout->printSet(listlen, fpmax_inst->list->FS, this->head[sequence]->count);
 
-                                LClose->insert(list->FS, LClose->posi+1, listlen, this->head[sequence]->count);
-                                list->top = listlen;
+                                LClose->insert(fpmax_inst->list->FS, LClose->posi+1, listlen, this->head[sequence]->count);
+                                fpmax_inst->list->top = listlen;
                                 update_cfi_trees(LClose->posi+1, this->head[sequence]->count);
-//                              list->top += new_item_no;
+//                              fpmax_inst->list->top += new_item_no;
                         }
                               /***************************/
 			memory* Close_buf;
 			Close_buf=allocate_buf(sequence, LClose->posi, ms);
 
 			CFI_tree* new_LClose = (CFI_tree*)Close_buf->newbuf(1, sizeof(CFI_tree));
-			new_LClose->init(Close_buf, fptree, LClose, LClose->head[sequence], list->top-1);
+			new_LClose->init(Close_buf, fptree, LClose, LClose->head[sequence], fpmax_inst->list->top-1);
 			fptree->set_close_tree(new_LClose);
-			cfitrees[LClose->posi+2] = new_LClose;
-			i=fptree->FPclose(fout);
+			fpmax_inst->cfitrees[LClose->posi+2] = new_LClose;
+			/*i=*/fptree->FPclose(fout);
 			
-			list->top = new_LClose->posi;
+			fpmax_inst->list->top = new_LClose->posi;
 			if(Close_buf->half())ms++;
 			delete Close_buf;
 
 		}
-		fp_buf->freebuf(MR, MC, MB);
+		fpmax_inst->fp_buf->freebuf(MR, MC, MB);
 	}
 	return 0;   
 }

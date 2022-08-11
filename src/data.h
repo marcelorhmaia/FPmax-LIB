@@ -7,8 +7,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <set>
 
 #define TransLen 50
+
+// Dataset is a type defined for passing in-memory input data (as a set of sets of integers)
+typedef std::set<std::set<int>> Dataset;
 
 class Transaction
 {
@@ -27,7 +31,8 @@ class Data
 {
  public:
 	
-	Data(char *filename);
+	Data(char const *filename);
+	Data(Dataset* dataset);
 	~Data();
 	int isOpen();
 	void close(){if(in)fclose(in);}
@@ -37,6 +42,8 @@ class Data
  private:
   
 	FILE *in;
+	Dataset* dataset;
+	Dataset::iterator nextTransaction;
 };
 
 #endif

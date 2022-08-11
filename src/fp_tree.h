@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _FP_TREE_CLASS
 #define _FP_TREE_CLASS
 
-#include <fstream.h>
+#include <fstream>
 #include "buffer.h"
 #include "data.h"
 #include "fp_node.h"

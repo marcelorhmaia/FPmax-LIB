@@ -2,12 +2,14 @@
 #define _FSOUT_CLASS
 
 #include <stdio.h>
+#include "fitemset.h"
 
 class FSout
 {
  public:
 
-  FSout(char *filename);
+  FSout(char const *filename);
+  FSout(unsigned int nlargest);
   ~FSout();
 
   int isOpen();
@@ -15,10 +17,13 @@ class FSout
   void printset(int length, int *iset);
   void printSet(int length, int *iset, int support);
   void close();
+  FISet* getFrequentItemsets();
 
  private:
 
   FILE *out;
+  FISet* frequentItemsets;
+  unsigned int nlargest;
 };
 
 #endif

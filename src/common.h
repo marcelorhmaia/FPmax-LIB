@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <time.h>
-#include "fp_tree.h"
+#include "fpmax.h"
 
 //#define BINARY               // ASCI file or binary file
 
@@ -48,23 +48,4 @@ const int power2[29] = {1, 2, 4, 8,
 			2097152, 4194304, 8388608,16777216, 
 			33554432, 67108864, 134217728, 268435456};	
 
-extern int TRANSACTION_NO; 
-extern int ITEM_NO;
-extern int THRESHOLD;
-extern int* order_item;		// given order i, order_item[i] gives itemname
-extern int* item_order;		// given item i, item_order[i] gives its new order 
-
-extern memory* fp_buf;
-extern bool* current_fi;
-extern int* compact;
-extern int* supp;
-
-extern int *ITlen;
-extern int* bran;
-extern int* prefix;
-
-extern stack* list;
-
-extern MFI_tree** mfitrees;
-
-extern CFI_tree** cfitrees;
+extern FPmax* fpmax_inst;

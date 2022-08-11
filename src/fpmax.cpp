@@ -37,42 +37,53 @@ THE POSSIBILITY OF SUCH DAMAGE.
  * last updated Sep. 09, 2004
  *
  */
+#include "fpmax.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
-#include <iostream.h>
-#include <fstream.h>
-#include <iomanip.h>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
 #include <time.h>
-#include "common.h"
 #include "buffer.h"
 
 #define LINT sizeof(int)
 
-int *ITlen;
-int* bran;
-int* prefix;
+using namespace std;
 
-int* order_item;		// given order i, order_item[i] gives itemname
-int* item_order;		// given item i, item_order[i] gives its new order 
-				// order_item[item_order[i]]=i; item_order[order_item[i]]=i;
-bool* current_fi;
-int* compact;
-int* supp;
+FPmax* fpmax_inst;
 
-MFI_tree** mfitrees;
-CFI_tree** cfitrees;
+void fpmax(char const * in, char const * out, unsigned int minsup)
+{
+	fpmax_inst = new FPmax(in, out, minsup);
+	fpmax_inst->run();
+	delete fpmax_inst;
+}
 
-stack* list;
-int TRANSACTION_NO=0;
-int ITEM_NO=100;
-int THRESHOLD;
+FISet* fpmax(Dataset* dataset, unsigned int minsup, unsigned int nlargest)
+{
+	fpmax_inst = new FPmax(dataset, minsup, nlargest);
+	FISet* frequentItemsets = fpmax_inst->run();
+	delete fpmax_inst;
+	
+	return frequentItemsets;
+}
 
-memory* fp_buf;
+FPmax::FPmax(char const * in, char const * out, int minsup) : fdat(new Data(in)), fout(new FSout(out)), minsup(minsup)
+{
+	if(!fdat->isOpen()) {
+		cerr << in << " could not be opened!" << endl;
+		exit(2);
+	}
+}
 
-void printLen()
+FPmax::FPmax(Dataset* dataset, int minsup, unsigned int nlargest) : fdat(new Data(dataset)), fout(new FSout(nlargest)), minsup(minsup)
+{
+}
+
+void FPmax::printLen()
 {
 	int i, j, sum=0;
 	for(i=ITEM_NO-1; i>=0&&ITlen[i]==0; i--);
@@ -82,26 +93,13 @@ void printLen()
 		printf("%d\n", ITlen[j]);
 }
 
-
-int main(int argc, char **argv)
+FISet* FPmax::run()
 {
-	if (argc < 3)
-	{
-	  cout << "usage: fmi <infile> <MINSUP> [<outfile>]\n";
-	  exit(1);
-	}
-	THRESHOLD = atoi(argv[2]);
-
+	THRESHOLD = minsup;
+	
 	int i;
 	FI_tree* fptree;
-
-	Data* fdat=new Data(argv[1]);
-
-	if(!fdat->isOpen()) {
-		cerr << argv[1] << " could not be opened!" << endl;
-		exit(2);
-	}
-
+	
 	fp_buf=new memory(1000, 524288L, 1048576L, 2);
 //	fp_buf=new memory(60, 4194304L, 8388608L, 2);
 //	fp_buf=new memory(2000, 262144L, 524288L, 2);
@@ -129,12 +127,12 @@ int main(int argc, char **argv)
 
 	fptree->scan2_DB(fdat);
     fdat->close();
-	if(fptree->itemno==0)return 0;
+	//if(fptree->itemno==0)return 0;
 
-	FSout* fout;
-	if(argc==4)
-	{
-		fout = new FSout(argv[3]);
+	// FSout* fout;
+	// if(out)
+	// {
+		// fout = new FSout(/*out*/);
 
 		//print the count of emptyset
 #ifdef FI
@@ -145,8 +143,8 @@ int main(int argc, char **argv)
 		if(TRANSACTION_NO != fptree->count[0])
 			fout->printSet(0, NULL, TRANSACTION_NO);
 #endif			
-	}else
-		fout = NULL;
+	// }else
+		// fout = NULL;
 
 
 	if(fptree->Single_path())
@@ -178,11 +176,19 @@ int main(int argc, char **argv)
 #endif
 		
 #ifdef MFI
+		if (fptree->itemno > 0)
+		{
 			fout->printSet(fptree->itemno, list->FS, fptree->head[fptree->itemno-1]->count);
 			ITlen[i-1]=1;
+		}
+	
+		if(fout)
+		{
+			fout->close();
+		}
 #endif
-		printLen();
-		return 0;
+		// printLen();
+		return fout->getFrequentItemsets();
 	}
 
 	current_fi = new bool[fptree->itemno];
@@ -227,9 +233,11 @@ int main(int argc, char **argv)
 		fptree->FP_growth(fout);
 #endif
 
-	printLen();
+    // printLen();
 	if(fout)
+	{
 		fout->close();
+	}
 
 	delete fp_buf;
 	delete list;
@@ -242,5 +250,5 @@ int main(int argc, char **argv)
 	delete []order_item;
 	delete []item_order;
 							
-	return 0;
+	return fout->getFrequentItemsets();
 }

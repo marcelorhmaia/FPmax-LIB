@@ -79,7 +79,7 @@ Fnode* Fnode::append(FI_tree* fptree, Fnode* sib, int itemno, int counts)
 {
 	Fnode* child;
 
-	child = (Fnode*)fp_buf->newbuf(1, sizeof(Fnode));
+	child = (Fnode*)fpmax_inst->fp_buf->newbuf(1, sizeof(Fnode));
 	child->init(this, itemno, counts);
 	
 	if(this->leftchild==NULL)this->leftchild=child;
