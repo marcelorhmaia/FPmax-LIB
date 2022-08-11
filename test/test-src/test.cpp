@@ -12,7 +12,7 @@ Dataset* loadDataset(char const *filename)
 	int item, pos;
 	while(!feof(in))
 	{
-		std::set<int> transaction;
+		set<int> transaction;
 		do {
 			item=0;
 			pos=0;
@@ -45,12 +45,12 @@ void mineElite(Dataset* dataset, unsigned int m_sup, unsigned int n_largest)
 	FISet* patterns = fpmax(dataset, m_sup, n_largest);
 	for (FISet::iterator it=patterns->begin(); it!=patterns->end(); ++it)
 	{
-		std::cout << it->size() << ";" << it->support() << ";";
-		for (std::set<int>::iterator it2=it->begin(); it2!=it->end(); ++it2)
+		cout << it->size() << ";" << it->support() << ";";
+		for (set<int>::iterator it2=it->begin(); it2!=it->end(); ++it2)
 		{
-			std::cout << *it2 << " ";
+			cout << *it2 << " ";
 		}
-		std::cout << std::endl;
+		cout << endl;
 	}
 }
 
@@ -59,12 +59,12 @@ void printDataset(Dataset* dataset)
 	int i = 0;
 	for (Dataset::iterator it=dataset->begin(); it!=dataset->end(); ++it)
 	{
-		std::cout << "T" << ++i << ": " << std::endl;
-		for (std::set<int>::iterator it2=it->begin(); it2!=it->end(); ++it2)
+		cout << "T" << ++i << ": " << endl;
+		for (set<int>::iterator it2=it->begin(); it2!=it->end(); ++it2)
 		{
-			std::cout << *it2 << " ";
+			cout << *it2 << " ";
 		}
-		std::cout << std::endl;
+		cout << endl;
 	}
 }
 
@@ -83,12 +83,12 @@ int main(int argc, char* argv[])
 	cout << "The result is:" << endl;
 	for (FISet::iterator it=patterns->begin(); it!=patterns->end(); ++it)
 	{
-		std::cout << it->size() << ";" << it->support() << ";";
-		for (std::set<int>::iterator it2=it->begin(); it2!=it->end(); ++it2)
+		cout << it->size() << ";" << it->support() << ";";
+		for (set<int>::iterator it2=it->begin(); it2!=it->end(); ++it2)
 		{
-			std::cout << *it2 << " ";
+			cout << *it2 << " ";
 		}
-		std::cout << std::endl;
+		cout << endl;
 	}
 	
 	cout << "\nTesting FPmax* with file-based I/O and min support 5, returning all patterns..." << flush;
