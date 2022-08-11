@@ -35,25 +35,6 @@ Dataset* loadDataset(char const *filename)
 	return dataset;
 }
 
-void mineElite(char const *in, char const *out, unsigned int m_sup)
-{
-	fpmax(in, out, m_sup);
-}
-
-void mineElite(Dataset* dataset, unsigned int m_sup, unsigned int n_largest)
-{
-	FISet* patterns = fpmax(dataset, m_sup, n_largest);
-	for (FISet::iterator it=patterns->begin(); it!=patterns->end(); ++it)
-	{
-		cout << it->size() << ";" << it->support() << ";";
-		for (set<int>::iterator it2=it->begin(); it2!=it->end(); ++it2)
-		{
-			cout << *it2 << " ";
-		}
-		cout << endl;
-	}
-}
-
 void printDataset(Dataset* dataset)
 {
 	int i = 0;
@@ -92,7 +73,7 @@ int main(int argc, char* argv[])
 	}
 	
 	cout << "\nTesting FPmax* with file-based I/O and min support 5, returning all patterns..." << flush;
-	mineElite(argv[1], "patterns.txt", 5);
+	fpmax(argv[1], "patterns.txt", 5);
 	time = clock()/CLOCKS_PER_SEC - time;
 	cout << " finished in " << time << " s (this is CPU time on Linux and wall time on Windows)" << endl;
 	
