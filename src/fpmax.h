@@ -58,7 +58,7 @@ Function for in-memory input/output
 Parameters:
 - dataset: input data - each transaction is a set of integers and a data set is a set of transactions (see `data.h` for the definition of the Dataset type)
 - minsup: minimum (absolute) support of frequent itemsets
-- nlargest: if >0, only this <nlargest> largest frequent itemsets are returned
+- nlargest: if > 0, only the <nlargest> largest frequent itemsets are returned
 
 Returns a pointer to an FISet object - a set of FrequentItemset objects (see `fitemset.h` for their definitions)
 */
