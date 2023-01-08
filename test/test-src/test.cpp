@@ -29,7 +29,7 @@ Dataset* loadDataset(char const *filename)
 			}
 		}while(c != '\n' && !feof(in));
 		if (!transaction.empty())
-			dataset->insert(transaction);
+			dataset->push_back(transaction);
 	}
 	
 	return dataset;

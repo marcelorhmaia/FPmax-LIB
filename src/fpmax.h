@@ -56,7 +56,7 @@ void fpmax(char const * in, char const * out, unsigned int minsup);
 Function for in-memory input/output
 
 Parameters:
-- dataset: input data - each transaction is a set of integers and a data set is a set of transactions (see `data.h` for the definition of the Dataset type)
+- dataset: input data - each transaction is a set of integers and a dataset is a list of transactions (see `data.h` for the definition of the Dataset type)
 - minsup: minimum (absolute) support of frequent itemsets
 - nlargest: if > 0, only the <nlargest> largest frequent itemsets are returned
 

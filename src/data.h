@@ -7,12 +7,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <list>
 #include <set>
 
 #define TransLen 50
 
-// Dataset is a type defined for passing in-memory input data (as a set of sets of integers)
-typedef std::set<std::set<int>> Dataset;
+// Dataset is a type defined for passing in-memory input data (as a list of sets of integers)
+typedef std::list<std::set<int>> Dataset;
 
 class Transaction
 {
