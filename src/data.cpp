@@ -43,8 +43,9 @@ int Data::isOpen()
   else return 0;
 }
 
-Transaction *Data::getNextTransaction(Transaction* Trans)
+Transaction *Data::getNextTransaction()
 {	
+	Transaction *Trans = new Transaction;
 	Trans->length = 0;
 	
 	if (dataset)
@@ -52,6 +53,7 @@ Transaction *Data::getNextTransaction(Transaction* Trans)
 		if (nextTransaction == dataset->end())
 		{
 			nextTransaction = dataset->begin();
+			delete Trans;
 			return 0;
 		}
 		
@@ -92,6 +94,7 @@ Transaction *Data::getNextTransaction(Transaction* Trans)
 	// if end of file is reached, rewind to beginning for next pass
 	if(feof(in)){
 		rewind(in);
+		delete Trans;
 		return 0;
 	}
 	// Note, also last transaction must end with newline, 
@@ -102,6 +105,7 @@ Transaction *Data::getNextTransaction(Transaction* Trans)
 	if(feof(in))
 	{
 	    rewind(in);
+		delete Trans;
 		return 0;
 	}
 	fread((char*)buffer, sizeof(int), 1, in);

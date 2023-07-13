@@ -12,7 +12,11 @@ FSout::FSout(unsigned int nlargest) : out(NULL), frequentItemsets(new FISet), nl
 
 FSout::~FSout()
 {
-  if(out) fclose(out);
+	if(out)
+	{
+		fclose(out);
+		delete frequentItemsets;
+	}
 }
 
 int FSout::isOpen()

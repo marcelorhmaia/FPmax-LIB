@@ -6,6 +6,7 @@ class FPmax
 	
 		FPmax(char const * in, char const * out, int minsup);
 		FPmax(Dataset* dataset, int minsup, unsigned int nlargest);
+		~FPmax();
 	
 		FISet* run();
 
@@ -16,9 +17,9 @@ class FPmax
 		int* order_item;		// given order i, order_item[i] gives itemname
 		int* item_order;		// given item i, item_order[i] gives its new order 
 								//	order_item[item_order[i]]=i; item_order[order_item[i]]=i;
-		bool* current_fi;
+		bool* current_fi = NULL;
 		int* compact;
-		int* supp;
+		int* supp = NULL;
 
 		MFI_tree** mfitrees;
 		CFI_tree** cfitrees;

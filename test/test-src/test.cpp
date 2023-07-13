@@ -32,6 +32,8 @@ Dataset* loadDataset(char const *filename)
 			dataset->push_back(transaction);
 	}
 	
+	fclose(in);
+	
 	return dataset;
 }
 
@@ -71,6 +73,8 @@ int main(int argc, char* argv[])
 		}
 		cout << endl;
 	}
+	
+	delete patterns;
 	
 	cout << "\nTesting FPmax* with file-based I/O and min support 5, returning all patterns..." << flush;
 	fpmax(argv[1], "patterns.txt", 5);

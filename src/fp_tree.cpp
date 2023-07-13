@@ -525,6 +525,13 @@ void FI_tree::init(int old_itemno, int new_itemno)
 		head = (Fnode**)fpmax_inst->fp_buf->newbuf(itemno, sizeof(Fnode*));
 }
 
+void FI_tree::free()
+{
+	for (int i = 0; i < itemno - 1 - SUDDEN; i++)
+		delete [] array[i];
+	delete []array;
+}
+
 void FI_tree::scan1_DB(Data* fdat)
 {
 	int i,j;
@@ -537,10 +544,9 @@ void FI_tree::scan1_DB(Data* fdat)
 	for(i=0; i<fpmax_inst->ITEM_NO; i++)
 		counts[i] = 0;
 
-	Transaction *Tran = new Transaction;
-	assert(Tran!=NULL);
+	Transaction *Tran;
 
-	while((Tran = fdat->getNextTransaction(Tran)))
+	while((Tran = fdat->getNextTransaction()))
 	{	
 		for(int i=0; i<Tran->length; i++) 
 		{
@@ -561,6 +567,8 @@ void FI_tree::scan1_DB(Data* fdat)
 			counts[Tran->t[i]]++;
 		}
 		fpmax_inst->TRANSACTION_NO++;
+		
+		delete Tran;
 	}
 
 	fpmax_inst->ITEM_NO = net_itemno+1;
@@ -630,7 +638,6 @@ void FI_tree::scan1_DB(Data* fdat)
 	fpmax_inst->ITEM_NO = itemno;
 
 	delete []counts;
-	delete Tran;
 }
 	
 void FI_tree::insert(int* compact, int counts, int current)
@@ -707,15 +714,14 @@ void FI_tree::scan2_DB(Data *fdat)
 {
 	int i, j, has;
 	int* origin, *buffer=new int;
-	Transaction *Tran = new Transaction;
 	origin = new int[fpmax_inst->ITEM_NO];
-	assert(Tran!=NULL&&origin!=NULL && buffer!=NULL);
+	assert(origin!=NULL && buffer!=NULL);
 
 	for(j=0; j<fpmax_inst->ITEM_NO; j++) origin[j]=-1;
 
 	for(i=0; i<fpmax_inst->TRANSACTION_NO; i++)
 	{
-		Tran = fdat->getNextTransaction(Tran);
+		Transaction *Tran = fdat->getNextTransaction();
 		has=0;
 		for(int j=0; j<Tran->length; j++) 
 		{
@@ -731,13 +737,13 @@ void FI_tree::scan2_DB(Data *fdat)
 			fill_count(origin, 1);
 			insert(fpmax_inst->compact, 1, has);
 		}
+		delete Tran;
 	}
 
 	cal_level_25();
 
 	delete []origin;
 	delete buffer;
-	delete Tran;
 }
 
 void FI_tree::scan1_DB(FI_tree* old_tree)

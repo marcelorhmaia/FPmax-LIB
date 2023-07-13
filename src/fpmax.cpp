@@ -83,6 +83,22 @@ FPmax::FPmax(Dataset* dataset, int minsup, unsigned int nlargest) : fdat(new Dat
 {
 }
 
+FPmax::~FPmax()
+{
+	delete []ITlen;
+	delete []bran;
+	delete []prefix;
+	delete []order_item;
+	delete []item_order;
+	if (current_fi != NULL) delete []current_fi;
+	delete []compact;
+	if (supp != NULL) delete []supp;
+	delete list;
+	delete fp_buf;
+	delete fdat;
+	delete fout;
+}
+
 void FPmax::printLen()
 {
 	int i, j, sum=0;
@@ -126,8 +142,8 @@ FISet* FPmax::run()
 	}
 
 	fptree->scan2_DB(fdat);
-    fdat->close();
-	//if(fptree->itemno==0)return 0;
+	// fdat->close();
+	// if(fptree->itemno==0)return 0;
 
 	// FSout* fout;
 	// if(out)
@@ -181,11 +197,6 @@ FISet* FPmax::run()
 			fout->printSet(fptree->itemno, list->FS, fptree->head[fptree->itemno-1]->count);
 			ITlen[i-1]=1;
 		}
-	
-		if(fout)
-		{
-			fout->close();
-		}
 #endif
 		// printLen();
 		return fout->getFrequentItemsets();
@@ -211,6 +222,7 @@ FISet* FPmax::run()
 		fptree->set_max_tree(LMFI);
 		mfitrees[0] = LMFI;
 		fptree->FPmax(fout);
+		fptree->free();
 		delete Max_buf;
 		delete []mfitrees;
 #endif
@@ -234,21 +246,19 @@ FISet* FPmax::run()
 #endif
 
     // printLen();
-	if(fout)
-	{
-		fout->close();
-	}
+	// if(fout)
+		// fout->close();
 
-	delete fp_buf;
-	delete list;
-	delete []current_fi;
-	delete []supp;
-        delete []ITlen;
-       	delete []bran;
-	delete []compact;
-	delete []prefix;
-	delete []order_item;
-	delete []item_order;
+	// delete fp_buf;
+	// delete list;
+	// delete []current_fi;
+	// delete []supp;
+	// delete []ITlen;
+	// delete []bran;
+	// delete []compact;
+	// delete []prefix;
+	// delete []order_item;
+	// delete []item_order;
 							
 	return fout->getFrequentItemsets();
 }

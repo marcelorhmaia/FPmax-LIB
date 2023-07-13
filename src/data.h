@@ -38,7 +38,7 @@ class Data
 	int isOpen();
 	void close(){if(in)fclose(in);}
 
-	Transaction *getNextTransaction(Transaction* Trans);
+	Transaction *getNextTransaction();
   
  private:
   

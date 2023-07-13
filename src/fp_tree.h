@@ -80,6 +80,7 @@ public:
 	void set_max_tree(MFI_tree* lmfisets){LMaxsets = lmfisets;};
 	void set_close_tree(CFI_tree* lclose){LClose = lclose;};
 	~FI_tree(){/*delete root;	delete []order;	delete []table;*/};
+	void free();
 
 	void scan1_DB(Data*);		//find the count of all nodes from origional DB
 	void scan2_DB(Data*);		//construct the first fp-tree from  origional DB
