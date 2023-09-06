@@ -34,7 +34,6 @@ Data::Data(Dataset* dataset) : in(NULL)
 Data::~Data()
 {
   if(in) fclose(in);
-  else if (dataset) delete dataset;
 }
 
 int Data::isOpen()

@@ -74,6 +74,7 @@ int main(int argc, char* argv[])
 		cout << endl;
 	}
 	
+	delete dataset;
 	delete patterns;
 	
 	cout << "\nTesting FPmax* with file-based I/O and min support 5, returning all patterns..." << flush;
